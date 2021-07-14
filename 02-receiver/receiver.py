@@ -50,7 +50,7 @@ def request_update(ipaddr):
 
 def main():
     answer = request_update(IP_ADDRESS)
-    #TODO - normalize temperature, log to file, post to Kafka
+    # TODO - normalize temperature, log to file, post to Kafka
     print(answer)
 
 ######################################################################
