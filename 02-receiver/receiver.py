@@ -58,6 +58,6 @@ def main():
 
 if __name__ == '__main__':
     IP_ADDRESS = get_ip_by_mac(MAC_ADDRESS)
-    while(True):
+    while True:
         main()
         time.sleep(10)
