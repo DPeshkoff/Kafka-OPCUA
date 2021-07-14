@@ -7,12 +7,13 @@
 ## Based on Python 3.9.1 64-bit                                     ##
 ######################################################################
 # IMPORTS
-from random import randint
 from json import dumps
+from random import randint
+from time import sleep
 ######################################################################
 
 FIELDS = ['temperature', 'brightness']
-ITERATIONS = 10
+SECONDS_TIMEOUT = 10
 
 
 def get_faked_measurements(index):
@@ -25,8 +26,12 @@ def get_faked_measurements(index):
 
 
 def main():
-    measurements = [dumps(get_faked_measurements(_), indent=4) for _ in range(ITERATIONS)]
-    print(*measurements, sep='\n')
+    iteration = 0
+    while True:
+        measurement = dumps(get_faked_measurements(iteration), indent=4)
+        print(measurement)
+        iteration += 1
+        sleep(SECONDS_TIMEOUT)
 
 ######################################################################
 
