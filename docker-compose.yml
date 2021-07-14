@@ -32,3 +32,9 @@ services:
         container_name: receiver
         depends_on: 
             - kafka
+
+    converter:
+        build: ./04-kafka-to-opcua
+        container_name: converter
+        depends_on: 
+            - receiver

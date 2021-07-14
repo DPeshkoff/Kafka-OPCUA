@@ -10,7 +10,9 @@
 import urllib.request
 import http
 import subprocess
-import time
+from time import sleep
+from kafka import KafkaProducer
+from json import dumps
 ######################################################################
 
 MAC_ADDRESS = "${mac-address}"
@@ -49,9 +51,18 @@ def request_update(ipaddr):
 
 
 def main():
+    KAFKA_TOPIC_NAME = 'sensors'
+    producer = KafkaProducer(
+        bootstrap_servers=['kafka:9092'],
+        value_serializer=lambda x: dumps(x).encode('utf-8')
+    )
+
     answer = request_update(IP_ADDRESS)
-    # TODO - normalize temperature, log to file, post to Kafka
-    print(answer, flush=True)
+    # TODO - normalize temperature, log to file
+
+    producer.send(KAFKA_TOPIC_NAME, value=answer)
+    print('Sent message to Kafka', flush=True)
+    #print(answer, flush=True)
 
 ######################################################################
 
@@ -59,6 +70,7 @@ def main():
 if __name__ == '__main__':
     #IP_ADDRESS = get_ip_by_mac(MAC_ADDRESS)
     IP_ADDRESS = 'ac89e0d5c309.ngrok.io'
+    sleep(10)
     while True:
         main()
-        time.sleep(10)
+        sleep(10)
