@@ -20,7 +20,7 @@ MAC_ADDRESS = "${mac-address}"
 
 def get_ip_by_mac(macaddr):
     try:
-        cmd = 'arp -a | findstr "{}" '.format(macaddr)
+        cmd = f'arp -a | findstr "{macaddr}" '
 
         returned_output = subprocess.check_output(
             (cmd), shell=True, stderr=subprocess.STDOUT)
@@ -40,7 +40,7 @@ def get_ip_by_mac(macaddr):
 
 def request_update(ipaddr):
     try:
-        return urllib.request.urlopen("http://" + ipaddr + "/update").read().decode("utf-8")
+        return urllib.request.urlopen(f"http://{ipaddr}/update").read().decode("utf-8")
 
     except (urllib.error.URLError, http.client.HTTPException):
         print("[ERROR] Connection failed.")
@@ -51,13 +51,14 @@ def request_update(ipaddr):
 def main():
     answer = request_update(IP_ADDRESS)
     # TODO - normalize temperature, log to file, post to Kafka
-    print(answer)
+    print(answer, flush=True)
 
 ######################################################################
 
 
 if __name__ == '__main__':
-    IP_ADDRESS = get_ip_by_mac(MAC_ADDRESS)
+    #IP_ADDRESS = get_ip_by_mac(MAC_ADDRESS)
+    IP_ADDRESS = 'ac89e0d5c309.ngrok.io'
     while True:
         main()
         time.sleep(10)
