@@ -13,7 +13,7 @@ The sensors are located on the left sife of the board.
 
 Overview of the board:
 
-![](screenshots/02-arduino-overview-2.png)
+![](screenshots/02-arduino-overview.png)
 
 Multisim design (png version of ```./multisim/arduino.ms14```):
 
