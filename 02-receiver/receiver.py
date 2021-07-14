@@ -46,6 +46,7 @@ def request_update(ipaddr):
 
     except (urllib.error.URLError, http.client.HTTPException):
         print("[ERROR] Connection failed.")
+        return None
 
 ######################################################################
 
@@ -59,9 +60,9 @@ def main():
 
     answer = request_update(IP_ADDRESS)
     # TODO - normalize temperature, log to file
-
-    producer.send(KAFKA_TOPIC_NAME, value=answer)
-    print('Sent message to Kafka', flush=True)
+    if answer:
+        producer.send(KAFKA_TOPIC_NAME, value=answer)
+        print('Sent message to Kafka', flush=True)
     #print(answer, flush=True)
 
 ######################################################################
