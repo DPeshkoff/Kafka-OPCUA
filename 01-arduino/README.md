@@ -40,17 +40,13 @@ Used libraries:
 * [ESPAsyncWebServer](https://github.com/me-no-dev/ESPAsyncWebServer);
 * SoftwareSerial.
 
-Root webpage:
+Root webpage + responses in web browser:
 
 ![](screenshots/05-root-nodemcu-page.png)
 
-Response in web browser:
-
-![](screenshots/06-nodemcu-response-browser.png)
-
 Debugging messages of NodeMCU:
 
-![](screenshots/07-nodemcu-debug.png)
+![](screenshots/06-nodemcu-debug.png)
 
 ## Project structure
 ### Folders
