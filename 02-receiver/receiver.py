@@ -10,7 +10,9 @@
 import urllib.request
 import http
 import subprocess
-import time
+from time import sleep
+from kafka import KafkaProducer
+from json import dumps
 ######################################################################
 
 MAC_ADDRESS = "${mac-address}"
@@ -20,7 +22,7 @@ MAC_ADDRESS = "${mac-address}"
 
 def get_ip_by_mac(macaddr):
     try:
-        cmd = 'arp -a | findstr "{}" '.format(macaddr)
+        cmd = f'arp -a | findstr "{macaddr}" '
 
         returned_output = subprocess.check_output(
             (cmd), shell=True, stderr=subprocess.STDOUT)
@@ -40,24 +42,36 @@ def get_ip_by_mac(macaddr):
 
 def request_update(ipaddr):
     try:
-        return urllib.request.urlopen("http://" + ipaddr + "/update").read().decode("utf-8")
+        return urllib.request.urlopen(f"http://{ipaddr}/update").read().decode("utf-8")
 
     except (urllib.error.URLError, http.client.HTTPException):
         print("[ERROR] Connection failed.")
+        return None
 
 ######################################################################
 
 
 def main():
+    KAFKA_TOPIC_NAME = 'sensors'
+    producer = KafkaProducer(
+        bootstrap_servers=['kafka:9092'],
+        value_serializer=lambda x: dumps(x).encode('utf-8')
+    )
+
     answer = request_update(IP_ADDRESS)
-    #TODO - normalize temperature, log to file, post to Kafka
-    print(answer)
+    # TODO - normalize temperature, log to file
+    if answer:
+        producer.send(KAFKA_TOPIC_NAME, value=answer)
+        print('Sent message to Kafka', flush=True)
+    #print(answer, flush=True)
 
 ######################################################################
 
 
 if __name__ == '__main__':
-    IP_ADDRESS = get_ip_by_mac(MAC_ADDRESS)
+    #IP_ADDRESS = get_ip_by_mac(MAC_ADDRESS)
+    IP_ADDRESS = 'ac89e0d5c309.ngrok.io'
+    sleep(10)
     while True:
         main()
-        time.sleep(10)
+        sleep(10)
