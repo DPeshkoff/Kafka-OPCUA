@@ -7,57 +7,149 @@
 ## Based on Python 3.9.1 64-bit                                     ##
 ######################################################################
 # IMPORTS
-import urllib.request
-import http
+from os import system
+import requests
 import subprocess
-import time
+import logging
+from time import sleep
+from kafka import KafkaProducer
+from json import dumps, loads
+from datetime import date, datetime
+from math import log, log10
 ######################################################################
+# PRIVATE DATA
 
-MAC_ADDRESS = "${mac-address}"
+MAC_ADDRESS = "${mac}"
+TOKEN = '${token}'
 
+######################################################################
+# GlOBAL DATA
+
+RECEIVER_MODE = "LOCAL"  # LOCAL or TUNNEL
+
+######################################################################
 # We search for dynamic IP of specific MAC address
 
 
 def get_ip_by_mac(macaddr):
     try:
-        cmd = 'arp -a | findstr "{}" '.format(macaddr)
+        # for now - uncomment if arp -a does not see NodeMCU
+        # TODO - more accurate solution
+        # for i in range (0, 255):
+        #    system(f"ping 192.168.0.{i}")
+
+        cmd = f'arp -a | findstr "{macaddr}" '
 
         returned_output = subprocess.check_output(
             (cmd), shell=True, stderr=subprocess.STDOUT)
 
         IP_ADDRESS = str(returned_output).split(' ', 1)[1].split(' ')[1]
 
-        print("Found IP address: ", IP_ADDRESS)
-
         return IP_ADDRESS
 
     except Exception:
-        print("[ERROR] IP not found, check WiFi conenction of NodeMCU.")
+        print("[ERROR] IP not found, check WiFi connection of NodeMCU.")
         exit()
 
 
 ######################################################################
+# http-get to nodemcu server
+
 
 def request_update(ipaddr):
     try:
-        return urllib.request.urlopen("http://" + ipaddr + "/update").read().decode("utf-8")
+        return requests.get(
+            f"http://{ipaddr}/update",
+            headers={'Authorization': TOKEN},
+        ).content.decode("utf-8")
 
-    except (urllib.error.URLError, http.client.HTTPException):
+    except (requests.ConnectionError):
         print("[ERROR] Connection failed.")
+        return None
+
+    except (requests.HTTPError):
+        print("[ERROR] HTTP connection failed.")
+        return None
+
+    except (requests.Timeout):
+        print("[ERROR] Connection timeout.")
+        return None
+
+######################################################################
+# Convert raw voltages to SI format
+
+
+def normalize(answer):
+
+    # Convert raw temperature data to Celsius degrees
+
+    normalized_temperature = 1 / \
+        (log((answer["temperature"] * 5.0 / 1023.0) / 2.5) /
+         4300.0 + 1.0 / 298.0) - 273.0
+
+    # Convert raw brightness data to lux
+
+    normalized_brightness = pow(10, (log10(
+        20000 / ((answer["brightness"] * 10000) / (1024 - answer["brightness"]))) / 0.37))
+
+    # Round and save
+    answer["temperature"] = round(normalized_temperature, 2)
+    answer["brightness"] = round(normalized_brightness, 2)
+
+    return answer
+
 
 ######################################################################
 
-
 def main():
+    KAFKA_TOPIC_NAME = 'sensors'
+    producer = KafkaProducer(
+        bootstrap_servers=['kafka:9092'],
+        value_serializer=lambda x: dumps(x).encode('utf-8')
+    )
+
     answer = request_update(IP_ADDRESS)
-    #TODO - normalize temperature, log to file, post to Kafka
-    print(answer)
+
+    if answer:
+
+        logging.info(
+            f'{datetime.now().time().replace(microsecond=0)} {answer}')
+
+        answer = normalize(loads(answer))
+
+        logging.info(
+            f'{datetime.now().time().replace(microsecond=0)} Normalized data: {answer}')
+
+        producer.send(KAFKA_TOPIC_NAME, value=answer)
+
+        logging.info(
+            f'{datetime.now().time().replace(microsecond=0)} Sent message to Kafka')
 
 ######################################################################
 
 
 if __name__ == '__main__':
-    IP_ADDRESS = get_ip_by_mac(MAC_ADDRESS)
-    while(True):
+
+    dn = date.today()
+
+    logging.basicConfig(filename=f"{dn}.log",
+                        encoding='utf-8', level=logging.INFO)
+
+    logging.info(
+        f'{datetime.now().time().replace(microsecond=0)} New session starting')
+
+    if (RECEIVER_MODE == "LOCAL"):
+        IP_ADDRESS = get_ip_by_mac(MAC_ADDRESS)
+
+    elif (RECEIVER_MODE == "TUNNEL"):
+        IP_ADDRESS = 'ac89e0d5c309.ngrok.io'
+    else:
+        print("[ERROR] Please specify receiver mode")
+
+    logging.info(
+        f'{datetime.now().time().replace(microsecond=0)} Starting for IP: {IP_ADDRESS}')
+
+    sleep(10)
+    while True:
         main()
-        time.sleep(10)
+        sleep(10)
