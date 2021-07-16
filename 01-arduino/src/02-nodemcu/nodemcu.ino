@@ -262,7 +262,12 @@ void setup() {
     }
     Serial.println("successful");
 
+    // Output MAC address
+    Serial.print("MAC: ");
+    Serial.println(WiFi.macAddress());
+
     // Success, output out IP
+    Serial.print("Local ip: ");
     Serial.println(WiFi.localIP());
 
     server.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
