@@ -25,7 +25,7 @@ TOKEN = '${token}'
 ######################################################################
 # GlOBAL DATA
 
-RECEIVER_MODE = "LOCAL"  # LOCAL or TUNNEL
+RECEIVER_MODE = "TUNNEL"  # LOCAL or TUNNEL
 
 ######################################################################
 # We search for dynamic IP of specific MAC address
@@ -96,7 +96,7 @@ def normalize(answer):
     answer["temperature"] = round(normalized_temperature, 2)
     answer["brightness"] = round(normalized_brightness, 2)
 
-    return answer
+    return dumps(answer, indent=4)
 
 
 ######################################################################
@@ -141,7 +141,7 @@ if __name__ == '__main__':
         IP_ADDRESS = get_ip_by_mac(MAC_ADDRESS)
 
     elif (RECEIVER_MODE == "TUNNEL"):
-        IP_ADDRESS = 'ac89e0d5c309.ngrok.io'
+        IP_ADDRESS = '23ad4b6b7721.ngrok.io'
     else:
         print("[ERROR] Please specify receiver mode")
 

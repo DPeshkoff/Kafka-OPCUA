@@ -8,6 +8,7 @@
 ######################################################################
 # IMPORTS
 from opcua import Client
+from opcua.ua.uaerrors._auto import BadNodeIdUnknown
 from time import sleep
 
 OPC_URL = 'opc.tcp://converter:4840'
@@ -19,15 +20,28 @@ def get_opc_client():
     return client
 
 
+def get_all_variables(client):
+    vars = []
+    i = 2
+    while True:
+        try:
+            node = client.get_node(f'ns=2;i={i}')
+            vars.append((node.get_browse_name(), node.get_display_name(), node.get_value()))
+        except BadNodeIdUnknown:
+            break
+        i += 1
+    return vars
+
+
 def main():
     client = get_opc_client()
-    # node = client.get_node("ns=1;i=1") 
-    # print(node)
-    # while True:
-    #     print(node.get_description(), node.get_browse_name(), node.get_value(), flush=True)
-    #     sleep(1)
+    vars = get_all_variables(client)
+    while True:
+        for var in vars:
+            print(*var, flush=True)
+        sleep(10)
 
 
 if __name__ == '__main__':
-    sleep(12)
+    sleep(20)
     main()
