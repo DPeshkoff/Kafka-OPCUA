@@ -10,7 +10,7 @@
 from kafka import KafkaConsumer
 from opcua import Server
 from opcua.ua import VariantType
-from json import loads
+from json import loads, dumps
 from time import sleep
 ######################################################################
 
@@ -62,7 +62,6 @@ def convert_message(msg, object, namespace):
     # проходимся по полям сообщения
     # если этого поля нет среди opc переменных, добавляем
     # присваиваем значение opc переменной
-    msg = loads(msg)
     for field, value in msg.items():
         try:
             opc_value_type = TYPE_TO_OPC_TYPE[type(value)]
@@ -95,7 +94,7 @@ def main():
 
     for event in consumer:
         message = event.value
-        print(f'Got message from Kafka: {message}', flush=True)
+        print(f'Got message from Kafka:\n{dumps(message, indent=4)}', flush=True)
         convert_message(message, object, namespace)
         consumer.commit()
         sleep(SLEEP_TIMEOUT)

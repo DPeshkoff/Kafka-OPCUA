@@ -97,19 +97,13 @@ def normalize(answer):
     answer["temperature"] = round(normalized_temperature, 2)
     answer["brightness"] = round(normalized_brightness, 2)
 
-    return dumps(answer, indent=4)
+    return answer
 
 
 ######################################################################
 
-def main():
-    KAFKA_TOPIC_NAME = 'sensors'
-    producer = KafkaProducer(
-        bootstrap_servers=['kafka:9092'],
-        value_serializer=lambda x: dumps(x).encode('utf-8')
-    )
-
-    answer = request_update(IP_ADDRESS)
+def get_data(ip):
+    answer = request_update(ip)
 
     if answer:
         logging.info(
@@ -120,20 +114,17 @@ def main():
         logging.info(
             f'{datetime.now().time().replace(microsecond=0)} Normalized data: {answer}')
 
-        producer.send(KAFKA_TOPIC_NAME, value=answer)
-
-        logging.info(
-            f'{datetime.now().time().replace(microsecond=0)} Sent message to Kafka')
+        return answer
+    
+    return None
 
 ######################################################################
 
 
-if __name__ == '__main__':
-
+def main():
     dn = date.today()
 
-    logging.basicConfig(filename=f"{dn}.log",
-                        encoding='utf-8', level=logging.INFO)
+    logging.basicConfig(filename=f"{dn}.log", level=logging.INFO)
     
     logging.getLogger().addHandler(logging.StreamHandler(stdout))
 
@@ -152,6 +143,24 @@ if __name__ == '__main__':
         f'{datetime.now().time().replace(microsecond=0)} Starting for IP: {IP_ADDRESS}')
 
     sleep(10)
+    
+    KAFKA_TOPIC_NAME = 'sensors'
+    producer = KafkaProducer(
+        bootstrap_servers=['kafka:9092'],
+        value_serializer=lambda x: dumps(x).encode('utf-8')
+    )
+
     while True:
-        main()
+        answer = get_data(IP_ADDRESS)
+        if answer:
+            producer.send(KAFKA_TOPIC_NAME, value=answer)
+            logging.info(
+                f'{datetime.now().time().replace(microsecond=0)} Sent message to Kafka')
+
         sleep(10)
+
+######################################################################
+
+
+if __name__ == '__main__':
+    main()

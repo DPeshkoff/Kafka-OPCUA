@@ -26,7 +26,7 @@ def get_all_variables(client):
     while True:
         try:
             node = client.get_node(f'ns=2;i={i}')
-            vars.append((node.get_browse_name(), node.get_display_name(), node.get_value()))
+            vars.append((node.get_browse_name(), node.get_value()))
         except BadNodeIdUnknown:
             break
         i += 1
@@ -35,8 +35,8 @@ def get_all_variables(client):
 
 def main():
     client = get_opc_client()
-    vars = get_all_variables(client)
     while True:
+        vars = get_all_variables(client)
         for var in vars:
             print(*var, flush=True)
         sleep(10)
