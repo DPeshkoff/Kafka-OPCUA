@@ -8,6 +8,7 @@
 ######################################################################
 # IMPORTS
 from os import system
+from sys import stdout
 import requests
 import subprocess
 import logging
@@ -133,6 +134,8 @@ if __name__ == '__main__':
 
     logging.basicConfig(filename=f"{dn}.log",
                         encoding='utf-8', level=logging.INFO)
+    
+    logging.getLogger().addHandler(logging.StreamHandler(stdout))
 
     logging.info(
         f'{datetime.now().time().replace(microsecond=0)} New session starting')
