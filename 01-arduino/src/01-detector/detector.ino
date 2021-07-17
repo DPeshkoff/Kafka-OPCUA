@@ -5,8 +5,8 @@
 // TECHNICAL INFORMATION
 // Arduino/Genuino Uno
 ////
-// SKETCH: 7146 bytes
-// GLOBAL VARIABLES: 426 bytes
+// SKETCH: 7182 bytes (22%)
+// GLOBAL VARIABLES: 446 bytes (21%)
 //////////////////////////////////////////////////////////////////////
 // INCLUDES
 #include <ArduinoJson.h>
@@ -15,6 +15,9 @@
 
 // SerialLink - bridge with NodeMCU
 SoftwareSerial SerialLink(5, 6);  // RX, TX
+
+// JSON static capacity
+const int32_t capacity = 600;
 
 // Global iteration counter
 uint32_t iteration = 0;
@@ -47,13 +50,17 @@ void setup() {
     // SerialLink: 4800 bauds (less amount of errors)
     SerialLink.begin(4800);
 
-    Serial.println("Iteration\tRaw temperature\tRaw brightness");
+    SerialLink.setTimeout(5000);
+
+    Serial.println("Iteration\tRaw temperature\tRaw brightness\tVoltage");
 
     // Register seven-segment display
     for (auto i : DisplayPins) {
         pinMode(i, OUTPUT);
     }
 }
+
+//////////////////////////////////////////////////////////////////////
 
 void loop() {
     // Get current second
@@ -81,11 +88,11 @@ void loop() {
         Serial.print("\t\t");
         Serial.print(temperature);
         Serial.print("\t\t");
-        Serial.println(brightness);
+        Serial.print(brightness);
 
         // Prepare JSON document
 
-        StaticJsonDocument<300> package;
+        StaticJsonDocument<capacity> package;
 
         package["iteration"] = iteration;
         package["temperature"] = temperature;

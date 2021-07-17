@@ -37,7 +37,7 @@ def get_ip_by_mac(macaddr):
         # TODO - more accurate solution
         # for i in range (0, 255):
         #    system(f"ping 192.168.0.{i}")
-
+        
         cmd = f'arp -a | findstr "{macaddr}" '
 
         returned_output = subprocess.check_output(
@@ -111,7 +111,6 @@ def main():
     answer = request_update(IP_ADDRESS)
 
     if answer:
-
         logging.info(
             f'{datetime.now().time().replace(microsecond=0)} {answer}')
 
