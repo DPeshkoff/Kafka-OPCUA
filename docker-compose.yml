@@ -38,3 +38,9 @@ services:
         container_name: converter
         depends_on: 
             - receiver
+
+    opcua-client:
+        build: ./05-opcua-client
+        container_name: opcua-client
+        depends_on: 
+            - converter

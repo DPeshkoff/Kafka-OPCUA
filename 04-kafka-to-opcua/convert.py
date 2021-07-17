@@ -22,8 +22,8 @@ SLEEP_TIMEOUT = 10
 OPC_URL = 'opc.tcp://0.0.0.0:4840'
 
 TYPE_TO_OPC_TYPE = {
-    type(int): VariantType.Int64,
-    type(float): VariantType.Double,
+    type(int()): VariantType.Int64,
+    type(float()): VariantType.Double,
     type(bool()): VariantType.Boolean,
     type(str()): VariantType.String,
     type(None): VariantType.Null
@@ -62,11 +62,12 @@ def convert_message(msg, object, namespace):
     # проходимся по полям сообщения
     # если этого поля нет среди opc переменных, добавляем
     # присваиваем значение opc переменной
+    msg = loads(msg)
     for field, value in msg.items():
         try:
             opc_value_type = TYPE_TO_OPC_TYPE[type(value)]
         except KeyError:
-            print(f'Invalid type: {type(value)}, couldn\t convert to OPC variable', flush=True)
+            print(f'Invalid type: {type(value)}, couldn\'t convert to OPC variable', flush=True)
             continue
 
         default_value = type(value)()
