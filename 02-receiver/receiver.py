@@ -38,7 +38,7 @@ def get_ip_by_mac(macaddr):
         # TODO - more accurate solution
         # for i in range (0, 255):
         #    system(f"ping 192.168.0.{i}")
-        
+
         cmd = f'arp -a | findstr "{macaddr}" '
 
         returned_output = subprocess.check_output(
@@ -115,7 +115,7 @@ def get_data(ip):
             f'{datetime.now().time().replace(microsecond=0)} Normalized data: {answer}')
 
         return answer
-    
+
     return None
 
 ######################################################################
@@ -125,7 +125,7 @@ def main():
     dn = date.today()
 
     logging.basicConfig(filename=f"{dn}.log", level=logging.INFO)
-    
+
     logging.getLogger().addHandler(logging.StreamHandler(stdout))
 
     logging.info(
@@ -143,7 +143,7 @@ def main():
         f'{datetime.now().time().replace(microsecond=0)} Starting for IP: {IP_ADDRESS}')
 
     sleep(10)
-    
+
     KAFKA_TOPIC_NAME = 'sensors'
     producer = KafkaProducer(
         bootstrap_servers=['kafka:9092'],
