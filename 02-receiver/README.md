@@ -23,7 +23,7 @@ Docker container is available, as is docker-compose for further modules of the p
 
 Screenshot of receiver log:
 
-![](screenshots/01-log.png=1190x1115)
+![](screenshots/01-log.png)
 
 
 ## Project structure
