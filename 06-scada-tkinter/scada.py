@@ -135,12 +135,12 @@ def horizontal_bar(root, current_value, x, y, bar_length, bar_height, min_value,
 
     # Current value label
 
-    canv.create_text(bar_length/2 - 10, bar_height-8, font='Rockwell 12',
+    canv.create_text(bar_length/2 - 10, bar_height-8, font='Rockwell 10',
                      anchor='w', justify=CENTER, fill='white', text=str(current_value))
 
     # Bar name
 
-    canv.create_text(1, bar_height+21, font='Rockwell 12', anchor='w',
+    canv.create_text(1, bar_height+21, font='Rockwell 10', anchor='w',
                      justify=CENTER, fill='white', text=bar_name)
 
 ######################################################################
