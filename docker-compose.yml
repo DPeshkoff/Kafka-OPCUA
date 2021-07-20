@@ -40,6 +40,9 @@ services:
     converter:
         build: ./04-kafka-to-opcua
         container_name: converter
+        hostname: converter
+        ports: 
+            - 4840:4840
         depends_on: 
             - receiver
 
@@ -48,3 +51,48 @@ services:
         container_name: opcua-client
         depends_on: 
             - converter
+
+    influxdb:
+        image: influxdb:1.8
+        container_name: influxdb
+        restart: always
+        ports:
+            - 8086:8086
+        volumes:
+            - influxdb-volume:/var/lib/influxdb
+        environment: 
+            - INFLUXDB_DB=sensors
+            - INFLUXDB_USER=grafana
+            - INFLUXDB_USER_PASSWORD=password
+            - INFLUXDB_ADMIN_ENABLED=true
+            - INFLUXDB_ADMIN_USER=admin 
+            - INFLUXDB_ADMIN_PASSWORD=password 
+        depends_on: 
+            - opcua-client
+
+    grafana:
+        image: grafana/grafana
+        container_name: grafana
+        restart: always
+        ports:
+            - 3000:3000
+        volumes:
+            - grafana-volume:/var/lib/grafana
+        logging: 
+            driver: "none"
+        depends_on: 
+            - influxdb
+    
+    scada:
+        build: ./06-scada-tkinter
+        container_name: scada
+        environment:
+            - DISPLAY=$DISPLAY
+        volumes:
+            - /tmp/.X11-unix:/tmp/.X11-unix
+        depends_on: 
+            - grafana
+
+volumes:
+    grafana-volume:
+    influxdb-volume:

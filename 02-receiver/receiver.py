@@ -135,7 +135,7 @@ def main():
         IP_ADDRESS = get_ip_by_mac(MAC_ADDRESS)
 
     elif (RECEIVER_MODE == "TUNNEL"):
-        IP_ADDRESS = '23ad4b6b7721.ngrok.io'
+        IP_ADDRESS = '3ecea0ee0d12.ngrok.io'
     else:
         print("[ERROR] Please specify receiver mode")
 

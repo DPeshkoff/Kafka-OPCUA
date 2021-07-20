@@ -7,7 +7,7 @@
 ## Based on Python 3.9.1 64-bit                                     ##
 ######################################################################
 # IMPORTS
-from time import strftime
+from time import strftime, sleep
 from tkinter import *
 from random import randint, uniform
 from opcua import Client
@@ -15,7 +15,7 @@ from opcua.ua.uaerrors._auto import BadNodeIdUnknown
 ######################################################################
 # PARAMETERS
 
-MODE = 'FAKE'  # 'FAKE' - generate fake data, 'OPCUA' - run OPCUA client
+MODE = 'OPCUA'  # 'FAKE' - generate fake data, 'OPCUA' - run OPCUA client
 
 OPC_URL = 'opc.tcp://converter:4840'  # URL for OPC server
 
@@ -39,22 +39,19 @@ values_b = []
 ######################################################################
 # Receive data
 
-def get_variables(client, i):
-    vars = []
-
+def get_variables():
+    i = 2
     while True:
         try:
             node = client.get_node(f'ns=2;i={i}')
-            vars.append((node.get_browse_name(), node.get_value()))
+            name, value = node.get_browse_name().Name, node.get_value()
         except BadNodeIdUnknown:
             break
+
+        match = {'iteration': values_i, 'temperature': values_t, 'brightness': values_b}
+        match[name].append(value)
+
         i += 1
-
-    values_i.append(int(vars['iteration'].get_value()))
-
-    values_t.append(float(vars['temperature'].get_value()))
-
-    values_b.append(float(vars['brightness'].get_value()))
 
 ######################################################################
 # Fake data
@@ -289,6 +286,7 @@ def update():
 
 
 if __name__ == '__main__':
+    sleep(20)
 
     if MODE == 'OPCUA':
         client = Client(OPC_URL)
